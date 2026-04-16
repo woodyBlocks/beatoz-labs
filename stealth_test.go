@@ -4,7 +4,7 @@
 //
 //  1. [배포] ERC5564Announcer + ERC6538Registry 컨트랙트 배포
 //  2. [설정] Alice(수신자)가 SpendKey + ViewKey 생성 후 레지스트리에 등록
-//  3. [송금] Bob(송신자)이 Alice의 스텔스 주소 파생 → BTOS 전송 + Announcement
+//  3. [송금] Bob(송신자)이 Alice의 스텔스 주소 파생 → BTZ 전송 + Announcement
 //  4. [스캔] Alice가 Announcement를 스캔하여 자신의 수신 발견
 //  5. [지출] Alice가 스텔스 개인키로 자산 지출 가능 여부 확인
 package stealthlab_test
@@ -31,7 +31,7 @@ import (
 func TestStealthAccount(t *testing.T) {
 	setup(t)
 
-	// 테스트 지갑 준비 (각 5 BTOS 펀딩)
+	// 테스트 지갑 준비 (각 5 BTZ 펀딩)
 	fundAmt := btztypes.ToGrans(5)
 	deployer := newFundedWallet(t, "deployer", fundAmt)
 	bob := newFundedWallet(t, "Bob(송신자)", fundAmt)
@@ -73,8 +73,8 @@ func TestStealthAccount(t *testing.T) {
 	t.Logf("  임시 공개키: %X", ann.EphemeralKey)
 	t.Logf("  뷰 태그:    0x%02X", ann.Metadata[1])
 
-	// ── Step 4: Bob이 스텔스 주소로 BTOS 전송 + announce ─────────────────────
-	t.Log("=== Step 4: Bob → 스텔스 주소로 BTOS 전송 ===")
+	// ── Step 4: Bob이 스텔스 주소로 BTZ 전송 + announce ─────────────────────
+	t.Log("=== Step 4: Bob → 스텔스 주소로 BTZ 전송 ===")
 
 	sendAmount := btztypes.ToGrans(2)
 	sendAndAnnounce(t, bob, ann, sendAmount, announcer)
@@ -83,7 +83,7 @@ func TestStealthAccount(t *testing.T) {
 	stealthAcct, err := bzweb3.GetAccount(ann.StealthAddr)
 	require_no_error(t, err)
 	require_equal(t, sendAmount.Dec(), stealthAcct.Balance.Dec(), "스텔스 주소 잔액")
-	t.Logf("  스텔스 주소 잔액: %s BTOS ✓", stealthAcct.Balance.Dec())
+	t.Logf("  스텔스 주소 잔액: %s BTZ ✓", stealthAcct.Balance.Dec())
 
 	// ── Step 5: Alice가 Announcement 스캔 ────────────────────────────────────
 	t.Log("=== Step 5: Alice가 Announcement 스캔 ===")
@@ -125,7 +125,7 @@ func TestStealthAccount(t *testing.T) {
 	require_no_error(t, err)
 	require_success(t, spendRet.CheckTx.Code, spendRet.CheckTx.Log)
 	require_success(t, spendRet.DeliverTx.Code, spendRet.DeliverTx.Log)
-	t.Logf("  스텔스 주소에서 %s BTOS 지출 성공 ✓", spendAmount.Dec())
+	t.Logf("  스텔스 주소에서 %s BTZ 지출 성공 ✓", spendAmount.Dec())
 
 	t.Log("=== 모든 단계 통과 — 스텔스 어카운트 PoC 성공 ===")
 }
@@ -205,6 +205,18 @@ func TestStealthCrypto(t *testing.T) {
 	require_no_error(t, err)
 	require_equal(t, (*stealth.ScanResult)(nil), skipped, "뷰 태그 불일치 시 nil 반환")
 	t.Log("뷰 태그 필터링 ✓")
+
+	// 잘못된 임시 공개키는 에러가 아니라 무시되어야 한다.
+	malformedAnn := &stealth.Announcement{
+		SchemeID:     ann.SchemeID,
+		StealthAddr:  ann.StealthAddr,
+		EphemeralKey: []byte{0x02, 0x01},
+		Metadata:     ann.Metadata,
+	}
+	ignored, err := stealth.Scan(malformedAnn, viewKey, &spendKey.PublicKey, spendKey)
+	require_no_error(t, err)
+	require_equal(t, (*stealth.ScanResult)(nil), ignored, "잘못된 announcement는 nil 반환")
+	t.Log("잘못된 announcement 무시 ✓")
 
 	// View-only 모드 (spendPrivKey = nil)
 	viewOnly, err := stealth.Scan(ann, viewKey, &spendKey.PublicKey, nil)
@@ -319,19 +331,19 @@ func lookupMetaAddress(t *testing.T, registrant btztypes.Address, registry *vm.E
 }
 
 // sendAndAnnounce는 스텔스 송금의 두 단계를 수행한다:
-//  1. BTOS를 스텔스 주소로 TRX_TRANSFER
+//  1. BTZ를 스텔스 주소로 TRX_TRANSFER
 //  2. ERC5564Announcer에 announce() 호출
 func sendAndAnnounce(t *testing.T, bob *btzweb3.Wallet, ann *stealth.Announcement, amount *uint256.Int, announcer *vm.EVMContract) {
 	t.Helper()
 	require_no_error(t, bob.SyncAccount(bzweb3))
 
-	// 1) BTOS 전송
+	// 1) BTZ 전송
 	transferRet, err := bob.TransferCommit(ann.StealthAddr, defGas(), defGasPrice(), amount, bzweb3)
 	require_no_error(t, err)
 	require_success(t, transferRet.CheckTx.Code, transferRet.CheckTx.Log)
 	require_success(t, transferRet.DeliverTx.Code, transferRet.DeliverTx.Log)
 	bob.AddNonce()
-	t.Logf("  BTOS 전송 txHash: %X", transferRet.Hash)
+	t.Logf("  BTZ 전송 txHash: %X", transferRet.Hash)
 
 	// 2) Announcement 발행
 	// EVM address 파라미터는 *[20]byte 타입으로 전달
