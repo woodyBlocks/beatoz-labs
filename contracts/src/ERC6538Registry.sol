@@ -26,12 +26,14 @@ contract ERC6538Registry {
         emit StealthMetaAddressSet(msg.sender, schemeId, stealthMetaAddress);
     }
 
-    /// @notice 대리 등록 (서명 검증 생략 — PoC 용)
+    /// @notice ABI 호환용 self-registration 래퍼
+    /// @dev 서명 기반 대리 등록은 이 PoC에 구현되어 있지 않다.
     function registerKeysOnBehalf(
         address registrant,
         uint256 schemeId,
         bytes calldata stealthMetaAddress
     ) external {
+        require(msg.sender == registrant, "ERC6538: unauthorized registrar");
         require(stealthMetaAddress.length == 66, "ERC6538: meta-address must be 66 bytes");
         _registry[registrant][schemeId] = stealthMetaAddress;
         emit StealthMetaAddressSet(registrant, schemeId, stealthMetaAddress);

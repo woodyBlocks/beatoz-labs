@@ -25,9 +25,16 @@ contract ERC5564Announcer {
     function announce(
         uint256 schemeId,
         address stealthAddress,
-        bytes memory ephemeralPubKey,
-        bytes memory metadata
+        bytes calldata ephemeralPubKey,
+        bytes calldata metadata
     ) external {
+        require(stealthAddress != address(0), "ERC5564: stealthAddress is zero");
+        require(ephemeralPubKey.length == 33, "ERC5564: ephemeral key must be 33 bytes");
+        require(
+            ephemeralPubKey[0] == 0x02 || ephemeralPubKey[0] == 0x03,
+            "ERC5564: ephemeral key must be compressed secp256k1"
+        );
+        require(metadata.length == 2 && metadata[0] == 0x01, "ERC5564: metadata must be 0x01 || viewTag");
         emit Announcement(schemeId, stealthAddress, msg.sender, ephemeralPubKey, metadata);
     }
 }

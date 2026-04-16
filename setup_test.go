@@ -21,10 +21,17 @@ import (
 // ─── 환경 설정 ─────────────────────────────────────────────────────────────────
 // 테스트 실행 전 다음 환경 변수를 설정해야 한다:
 //
-//   BEATOZ_RPC_URL      - beatoz 노드 HTTP RPC (기본: http://localhost:36657)
-//   BEATOZ_WS_URL       - beatoz 노드 WebSocket (기본: ws://localhost:36657/websocket)
+//   BEATOZ_RPC_URL      - beatoz 노드 HTTP RPC (기본: https://rpc-testnet0.beatoz.io)
+//   BEATOZ_WS_URL       - beatoz 노드 WebSocket (기본: wss://rpc-testnet0.beatoz.io/websocket)
 //   BEATOZ_FUNDER_KEY   - 펀딩용 지갑 파일 경로 (기본: ./testdata/funder.json)
 //   BEATOZ_FUNDER_PASS  - 펀딩용 지갑 비밀번호 (기본: 1111)
+
+const (
+	defaultRPCURL    = "https://rpc-testnet0.beatoz.io"
+	defaultWSURL     = "wss://rpc-testnet0.beatoz.io/websocket"
+	defaultFunderKey = "./testdata/funder.json"
+	defaultFunderPwd = "1111"
+)
 
 var (
 	rpcURL    string
@@ -40,10 +47,10 @@ var (
 func setup(t *testing.T) {
 	t.Helper()
 	setupOnce.Do(func() {
-		rpcURL = envOrDefault("BEATOZ_RPC_URL", "http://localhost:36657")
-		wsURL = envOrDefault("BEATOZ_WS_URL", "ws://localhost:36657/websocket")
-		walletPath := envOrDefault("BEATOZ_FUNDER_KEY", "./testdata/funder.json")
-		walletPass := []byte(envOrDefault("BEATOZ_FUNDER_PASS", "1111"))
+		rpcURL = envOrDefault("BEATOZ_RPC_URL", defaultRPCURL)
+		wsURL = envOrDefault("BEATOZ_WS_URL", defaultWSURL)
+		walletPath := envOrDefault("BEATOZ_FUNDER_KEY", defaultFunderKey)
+		walletPass := []byte(envOrDefault("BEATOZ_FUNDER_PASS", defaultFunderPwd))
 
 		// NewBeatozWeb3는 Genesis()를 호출하므로 노드 연결 실패 시 panic
 		func() {

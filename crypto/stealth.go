@@ -12,7 +12,7 @@
 //  1. Alice(수신자)는 SpendKey + ViewKey 두 쌍을 생성하고 MetaAddress로 등록
 //  2. Bob(송신자)은 Alice의 MetaAddress로 일회용 StealthAddress를 파생
 //  3. Bob은 ERC5564Announcer에 (stealthAddr, ephemeralPubKey, metadata)를 announce
-//  4. Bob은 stealthAddr로 BTOS 전송
+//  4. Bob은 stealthAddr로 BTZ 전송
 //  5. Alice는 Announcement 이벤트를 스캔하여 자신의 수신 확인
 //  6. Alice는 StealthPrivKey를 파생하여 자산 지출
 package stealth
@@ -157,7 +157,7 @@ func Scan(
 	// 1. 임시 공개키 복원
 	R, err := ethcrypto.DecompressPubkey(ann.EphemeralKey)
 	if err != nil {
-		return nil, fmt.Errorf("stealth: decompress ephemeral key: %w", err)
+		return nil, nil // malformed announcement는 무시
 	}
 
 	// 2. ECDH

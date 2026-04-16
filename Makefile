@@ -45,8 +45,8 @@ test-crypto:
 
 # 통합 테스트 — 실행 중인 beatoz 노드 필요
 # 환경 변수:
-#   BEATOZ_RPC_URL     (기본: http://localhost:36657)
-#   BEATOZ_WS_URL      (기본: ws://localhost:36657/websocket)
+#   BEATOZ_RPC_URL     (기본: https://rpc-testnet0.beatoz.io)
+#   BEATOZ_WS_URL      (기본: wss://rpc-testnet0.beatoz.io/websocket)
 #   BEATOZ_FUNDER_KEY  (기본: ./testdata/funder.json)
 #   BEATOZ_FUNDER_PASS (기본: 1111)
 test: build-contracts
@@ -67,7 +67,7 @@ funder:
 		echo "펀더 지갑 생성 중..."; \
 		$(GO) run ./cmd/mkwallet -out testdata/funder.json -pass 1111; \
 		echo "생성 완료: testdata/funder.json"; \
-		echo "이 지갑에 beatoz 노드에서 충분한 BTOS를 전송하세요."; \
+		echo "이 지갑에 beatoz 노드에서 충분한 BTZ를 전송하세요."; \
 	fi
 
 # ─── 정리 ────────────────────────────────────────────────────────────────────
