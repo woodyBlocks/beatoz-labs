@@ -1,0 +1,19 @@
+# 지갑 파일 (개인키 포함 — 절대 커밋 금지)
+testdata/
+
+# Foundry 컴파일 출력물
+contracts/out/
+contracts/cache/
+
+# Go 빌드 캐시
+*.test
+*.out
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
